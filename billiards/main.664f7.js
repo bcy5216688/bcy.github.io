@@ -74,38 +74,38 @@
 
         var onStart = function () {
             cc.view.resizeWithBrowserSize(true);
-            // UC browser on many android devices have performance issue with retina display
-            if (cc.sys.os !== cc.sys.OS_ANDROID || cc.sys.browserType !== cc.sys.BROWSER_TYPE_UC) {
-                cc.view.enableRetina(true);
-            }
-            //cc.view.setDesignResolutionSize(settings.designWidth, settings.designHeight, cc.ResolutionPolicy.SHOW_ALL);
 
-            if (cc.sys.isBrowser) {
-                setLoadingDisplay();
-            }
-
-            if (cc.sys.isMobile) {
-                if (settings.orientation === 'landscape') {
-                    cc.view.setOrientation(cc.macro.ORIENTATION_LANDSCAPE);
+            if (!false) {
+                // UC browser on many android devices have performance issue with retina display
+                if (cc.sys.os !== cc.sys.OS_ANDROID || cc.sys.browserType !== cc.sys.BROWSER_TYPE_UC) {
+                    cc.view.enableRetina(true);
                 }
-                else if (settings.orientation === 'portrait') {
-                    cc.view.setOrientation(cc.macro.ORIENTATION_PORTRAIT);
+                if (cc.sys.isBrowser) {
+                    setLoadingDisplay();
                 }
-                // qq, wechat, baidu
-                cc.view.enableAutoFullScreen(
-                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_BAIDU &&
-                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_WECHAT &&
-                    cc.sys.browserType !== cc.sys.BROWSER_TYPE_MOBILE_QQ
-                );
-            }
 
-            // Limit downloading max concurrent task to 2,
-            // more tasks simultaneously may cause performance draw back on some android system / brwosers.
-            // You can adjust the number based on your own test result, you have to set it before any loading process to take effect.
-            if (cc.sys.isBrowser && cc.sys.os === cc.sys.OS_ANDROID) {
-                cc.macro.DOWNLOAD_MAX_CONCURRENT = 2;
+                if (cc.sys.isMobile) {
+                    if (settings.orientation === 'landscape') {
+                        cc.view.setOrientation(cc.macro.ORIENTATION_LANDSCAPE);
+                    }
+                    else if (settings.orientation === 'portrait') {
+                        cc.view.setOrientation(cc.macro.ORIENTATION_PORTRAIT);
+                    }
+                    // qq, wechat, baidu
+                    cc.view.enableAutoFullScreen(
+                        cc.sys.browserType !== cc.sys.BROWSER_TYPE_BAIDU &&
+                        cc.sys.browserType !== cc.sys.BROWSER_TYPE_WECHAT &&
+                        cc.sys.browserType !== cc.sys.BROWSER_TYPE_MOBILE_QQ
+                    );
+                }
+                
+                // Limit downloading max concurrent task to 2,
+                // more tasks simultaneously may cause performance draw back on some android system / brwosers.
+                // You can adjust the number based on your own test result, you have to set it before any loading process to take effect.
+                if (cc.sys.isBrowser && cc.sys.os === cc.sys.OS_ANDROID) {
+                    cc.macro.DOWNLOAD_MAX_CONCURRENT = 2;
+                }
             }
-
 
             // init assets
             cc.AssetLibrary.init({
@@ -119,9 +119,6 @@
             var launchScene = settings.launchScene;
 
             // load scene
-            if (cc.runtime) {
-                cc.director.setRuntimeLaunchScene(launchScene);
-            }
             cc.director.loadScene(launchScene, null,
                 function () {
                     if (cc.sys.isBrowser) {
@@ -133,10 +130,6 @@
                         }
                     }
                     cc.loader.onProgress = null;
-
-                    // play game
-                    // cc.game.resume();
-
                     console.log('Success to load scene: ' + launchScene);
                 }
             );
@@ -144,7 +137,7 @@
 
         // jsList
         var jsList = settings.jsList;
-        var bundledScript = settings.debug ? 'src/project.dev.js' : 'src/project.js';
+        var bundledScript = settings.debug ? 'src/project.dev.js' : 'src/project.4df8d.js';
         if (jsList) {
             jsList = jsList.map(function (x) { return 'src/' + x; });
             jsList.push(bundledScript);
@@ -165,7 +158,7 @@
             id: 'GameCanvas',
             scenes: settings.scenes,
             debugMode: settings.debug ? cc.DebugMode.INFO : cc.DebugMode.ERROR,
-            showFPS: settings.debug,
+            showFPS: !false && settings.debug,
             frameRate: 60,
             jsList: jsList,
             groupList: settings.groupList,
@@ -176,13 +169,24 @@
         cc.game.run(option, onStart);
     }
 
-    if (window.document) {
+    if (window.jsb) {
+        require('src/settings.11553.js');
+        require('src/jsb_polyfill.js');
+        boot();
+    }
+    else if (false) {
+        require(window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.594b9.js');
+        var prevPipe = cc.loader.md5Pipe || cc.loader.assetLoader;
+        cc.loader.insertPipeAfter(prevPipe, wxDownloader);
+        boot();
+    }
+    else if (window.document) {
         var splash = document.getElementById('splash');
         splash.style.display = 'block';
 
         var cocos2d = document.createElement('script');
         cocos2d.async = true;
-        cocos2d.src = window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.js';
+        cocos2d.src = window._CCSettings.debug ? 'cocos2d-js.js' : 'cocos2d-js-min.594b9.js';
 
         var engineLoaded = function () {
             document.body.removeChild(cocos2d);
@@ -192,12 +196,6 @@
         };
         cocos2d.addEventListener('load', engineLoaded, false);
         document.body.appendChild(cocos2d);
-    }
-    else if (window.jsb) {
-        require('src/settings.js');
-        require('src/jsb_polyfill.js');
-
-        boot();
     }
 
 })();
